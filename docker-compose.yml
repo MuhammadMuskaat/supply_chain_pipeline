@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: supplychain_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: supply_chain
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - supplychain_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Adminer - Web-based database management
+  adminer:
+    image: adminer
+    container_name: supplychain_adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - supplychain_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  supplychain_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
